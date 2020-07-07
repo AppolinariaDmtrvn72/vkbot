@@ -1,0 +1,137 @@
+{
+  "tomsk": {
+    "vocabulary": ["томск"],
+    "url": "tomsk.",
+    "name": "в Томске"
+  },
+  "chelyabinsk": {
+    "vocabulary": ["челябинск", "челяб"],
+    "url": "chelyabinsk.",
+    "name": "в Челябинске"
+  },
+  "rostov": {
+    "vocabulary": ["ростов"],
+    "url": "rostov.",
+    "name": "в Ростове"
+  },
+  "krasnoyarsk": {
+    "vocabulary": ["красноярск"],
+    "url": "krasnoyarsk.",
+    "name": "в Красноярске"
+  },
+  "voronezh": {
+    "vocabulary": ["воронеж", "врж"],
+    "url": "voronezh.",
+    "name": "в Воронеже"
+  },
+  "volgograd": {
+    "vocabulary": ["волгоград"],
+    "url": "volgograd.",
+    "name": "в Волгограде"
+  },
+  "krasnodar": {
+    "vocabulary": ["краснодар"],
+    "url": "krasnodar.",
+    "name": "в Краснодаре"
+  },
+  "saratov": {
+    "vocabulary": ["саратов"],
+    "url": "saratov.",
+    "name": "в Саратове"
+  },
+  "vladivostok": {
+    "vocabulary": ["владивосток", "владик"],
+    "url": "vladivostok.",
+    "name": "во Владивостоке"
+  },
+  "izhevsk": {
+    "vocabulary": ["ижевск"],
+    "url": "izhevsk.",
+    "name": "в Ижевске"
+  },
+  "barnaul": {
+    "vocabulary": ["барнаул"],
+    "url": "barnaul.",
+    "name": "в Барнауле"
+  },
+  "irkutsk": {
+    "vocabulary": ["иркутск"],
+    "url": "irkutsk.",
+    "name": "в Иркутске"
+  },
+  "ulyanovsk": {
+    "vocabulary": ["ульяновск"],
+    "url": "ulyanovsk.",
+    "name": "в Ульяновске"
+  },
+  "habarovsk": {
+    "vocabulary": ["хабаровск"],
+    "url": "habarovsk.",
+    "name": "в Хабаровске"
+  },
+  "kazan": {
+    "vocabulary": ["казан"],
+    "url": "kazan.",
+    "name": "в Казани"
+  },
+  "samara": {
+    "vocabulary": ["самар"],
+    "url": "samara.",
+    "name": "в Самаре"
+  },
+  "ufa": {
+    "vocabulary": ["уфа"],
+    "url": "ufa.",
+    "name": "в Уфе"
+  },
+  "perm": {
+    "vocabulary": ["перм"],
+    "url": "perm.",
+    "name": "в Перми"
+  },
+  "tolyatti": {
+    "vocabulary": ["тольятти", "тольяти"],
+    "url": "tolyatti.",
+    "name": "в Тольятти"
+  },
+  "yaroslavl": {
+    "vocabulary": ["ярославл", "ярик"],
+    "url": "yaroslavl.",
+    "name": "в Ярославле"
+  },
+  "mahachkala": {
+    "vocabulary": ["махачкал"],
+    "url": "mahachkala.",
+    "name": "в Махачкале"
+  },
+  "nizhniy-novgorod": {
+    "vocabulary": ["нижний новгород", "нижнем новгород"],
+    "url": "nizhniy-novgorod.",
+    "name": "в Нижнем Новгороде"
+  },
+  "moscow": {
+    "vocabulary": ["москв", "мск", "moscow", "MSC", "MSK"],
+    "url": "moskva.",
+    "name": "в Москве"
+  },
+  "saint-petersburg": {
+    "vocabulary": ["санкт-петербург", "питер", "спб", "spb"],
+    "url": "spb.",
+    "name": "в Питере"
+  },
+  "ekaterinburg": {
+    "vocabulary": ["екатеринбург", "екб", "ебург", "екат"],
+    "url": "ekaterinburg.",
+    "name": "в Екатеринбурге"
+  },
+  "orenburg": {
+    "vocabulary": ["оренбург", "орб", "обург", "орен"],
+    "url": "orenburg.",
+    "name": "в Оренбурге"
+  },
+  "novosibirsk": {
+    "vocabulary": ["новосибирск", "новосиб"],
+    "url": "novosibirsk.",
+    "name": "в Новосибирске"
+  }
+}
