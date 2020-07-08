@@ -123,7 +123,7 @@ const parseDate = (text) => {
     return convertData(new Date(year - yearBack[1], month, day));
   }
   if (isDateFuture(day, month, year)) {
-    return parseDate(" ");
+    return null;
   }
   return day + "/" + month + "/" + year;
 };
@@ -164,103 +164,109 @@ const isDateFuture = (day, month, year) => {
 
 const parseBanksRatesOneValute = (chatId, town, valute) => {
   if (!town) {
-    town = { url: "", name: "В России" };
+    vk.sendMessage(chatId, "Вы не указали город!");
+  } else {
+    let resultString = `Курс ${valute.name} ${town.name}\n\n`;
+    let isEmpty = 1;
+    osmosis
+      .get(`https://${town.url}bankiros.ru/currency/${valute.url}`)
+      .find("tbody > tr.productBank")
+      .set(["td"])
+      .data((data) => {
+        resultString +=
+          "" +
+          data[0] +
+          "\n   Покупка  " +
+          data[1] +
+          "\n   Продажа " +
+          data[2] +
+          "\n\n";
+        isEmpty = 0;
+      })
+      .error(logger.error)
+      .done(() => {
+        if (isEmpty) {
+          vk.sendMessage(chatId, `${town.name} не обменивают ${valute.name}`);
+        } else {
+          vk.sendMessage(chatId, resultString);
+        }
+      });
   }
-  let resultString = `Курс ${valute.name} ${town.name}\n\n`;
-  let isEmpty = 1;
-  osmosis
-    .get(`https://${town.url}bankiros.ru/currency/${valute.url}`)
-    .find("tbody > tr.productBank")
-    .set(["td"])
-    .data((data) => {
-      resultString +=
-        "" +
-        data[0] +
-        "\n   Покупка  " +
-        data[1] +
-        "\n   Продажа " +
-        data[2] +
-        "\n\n";
-      isEmpty = 0;
-    })
-    .error(logger.error)
-    .done(() => {
-      if (isEmpty) {
-        vk.sendMessage(chatId, `${town.name} не обменивают ${valute.name}`);
-      } else {
-        vk.sendMessage(chatId, resultString);
-      }
-    });
 };
 
 const parseBanksRatesAllValutes = (chatId, town) => {
   if (!town) {
-    town = { url: "", name: "В России" };
+    vk.sendMessage(chatId, "Вы не указали город!");
+  } else {
+    let resultString = `Лучшие курсы валют ${town.name}:\n\n`;
+    osmosis
+      .get(`https://${town.url}bankiros.ru/currency/`)
+      .find("table.non-standard > tr")
+      .set(["a", "span.conv-val"])
+      .data((data) => {
+        if (data.length > 1) {
+          resultString +=
+            "" +
+            data[0].toUpperCase() +
+            "\n " +
+            data[1] +
+            "\n   Покупка    " +
+            data[3] +
+            "\n " +
+            data[2] +
+            "\n   Продажа   " +
+            data[4] +
+            "\n\n";
+        }
+      })
+      .error(logger.error)
+      .done(() => {
+        vk.sendMessage(chatId, resultString);
+      });
   }
-  let resultString = `Лучшие курсы валют ${town.name}:\n\n`;
-  osmosis
-    .get(`https://${town.url}bankiros.ru/currency/`)
-    .find("table.non-standard > tr")
-    .set(["a", "span.conv-val"])
-    .data((data) => {
-      if (data.length > 1) {
-        resultString +=
-          "" +
-          data[0].toUpperCase() +
-          "\n " +
-          data[1] +
-          "\n   Покупка    " +
-          data[3] +
-          "\n " +
-          data[2] +
-          "\n   Продажа   " +
-          data[4] +
-          "\n\n";
-      }
-    })
-    .error(logger.error)
-    .done(() => {
-      vk.sendMessage(chatId, resultString);
-    });
 };
 
 const CBReq = (chatId, date) => {
   let resultString = `Курс ЦБ на ${date}\n\n`;
-  request(
-    {
-      uri: `http://www.cbr.ru/scripts/XML_daily.asp?date_req=${date}`,
-      method: "GET",
-      encoding: "binary",
-    },
-    function (error, response, body) {
-      if (response && response.statusCode == 200) {
-        body = new Buffer(body, "binary");
-        body = conv.convert(body).toString();
+  if (date != null) {
+    request(
+      {
+        uri: `http://www.cbr.ru/scripts/XML_daily.asp?date_req=${date}`,
+        method: "GET",
+        encoding: "binary",
+      },
+      function (error, response, body) {
+        if (response && response.statusCode == 200) {
+          body = new Buffer(body, "binary");
+          body = conv.convert(body).toString();
 
-        if (parser.validate(body) === true) {
-          var jsonObj = parser.parse(body).ValCurs.Valute || {};
-          if (Object.keys(jsonObj).length === 0) {
-            logger.error(`${JSON.stringify(response)}`);
+          if (parser.validate(body) === true) {
+            var jsonObj = parser.parse(body).ValCurs.Valute || {};
+            if (Object.keys(jsonObj).length === 0) {
+              logger.error(`${JSON.stringify(response)}`);
+            }
+            for (let i = 0; i < jsonObj.length; i++) {
+              resultString +=
+                "[" +
+                jsonObj[i].CharCode +
+                "]  " +
+                jsonObj[i].Name +
+                " x" +
+                jsonObj[i].Nominal +
+                "\n  " +
+                jsonObj[i].Value +
+                "\n\n";
+            }
+            vk.sendMessage(chatId, resultString);
           }
-          for (let i = 0; i < jsonObj.length; i++) {
-            resultString +=
-              "[" +
-              jsonObj[i].CharCode +
-              "]  " +
-              jsonObj[i].Name +
-              " x" +
-              jsonObj[i].Nominal +
-              "\n  " +
-              jsonObj[i].Value +
-              "\n\n";
-          }
-          vk.sendMessage(chatId, resultString);
+        } else {
+          logger.error(error);
         }
-      } else {
-        logger.error(error);
       }
-    }
-  );
+    );
+  } else {
+    vk.sendMessage(chatId, "Вы указали будущую дату!");
+  }
 };
 
 vk.command(/(\d.+) (.+) в (.+)/, function (ctx) {
