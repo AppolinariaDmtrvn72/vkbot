@@ -31,6 +31,10 @@ const parse = (text, json) => {
   return "";
 };
 
+const sendMessage = (id, msg) => {
+  vk.sendMessage(id, msg);
+};
+
 const parseDate = (text) => {
   let day, month, year;
   let dateRegex = /(0?[1-9]|[12][0-9]|3[01])[\/\-\. ](0?[1-9]|1[012]|(янв(?:аря)?|фев(?:раля)?|мар(?:та)?|апр(?:еля)?|мая|июн(?:я)?|июл(?:я)?|авг(?:уста)?|сен(?:тября)?|окт(?:ября)?|ноя(?:бря)?|дек(?:абря)?))($|[ \/\.\-\n]([0-9]{2,4})?)/;
@@ -44,14 +48,14 @@ const parseDate = (text) => {
     day = new Date().getDate();
   }
   if (day < 10) {
-    day = "0" + day.toString();
+    day = "0" + parseInt(day).toString();
   }
   if (!month) {
     month = "0" + (new Date().getMonth() + 1);
   } else if (month >= 0) {
     month = match[2];
     if (month < 10) {
-      month = "0" + month.toString();
+      month = "0" + parseInt(month).toString();
     }
   } else {
     if (month == "янв" || month == "января") {
@@ -103,22 +107,22 @@ const parseDate = (text) => {
     return convertData(new Date(year, month, parseInt(day) - 1));
   }
 
-  let dayBack = /(\d+) (дней|день) назад/.exec(text);
+  const dayBack = /(\d+) (дней|день) назад/.exec(text);
   if (dayBack) {
     return convertData(new Date(year, month, parseInt(day) - dayBack[1]));
   }
 
-  let weekBack = /(\d+) (недел.) назад/.exec(text);
+  const weekBack = /(\d+) (недел.) назад/.exec(text);
   if (weekBack) {
     return convertData(new Date(year, month, parseInt(day) - weekBack[1] * 7));
   }
 
-  let monthBack = /(\d+) (месяц.+) назад/.exec(text);
+  const monthBack = /(\d+) (месяц.+) назад/.exec(text);
   if (monthBack) {
     return convertData(new Date(year, parseInt(month) - monthBack[1], day));
   }
 
-  let yearBack = /(\d+) (год.|лет) назад/.exec(text);
+  const yearBack = /(\d+) (год.|лет) назад/.exec(text);
   if (yearBack) {
     return convertData(new Date(year - yearBack[1], month, day));
   }
@@ -136,35 +140,16 @@ const convertData = (date) => {
 };
 
 const isDateFuture = (day, month, year) => {
-  let today = new Date();
-  let todayDay = today.getDate();
-  let todayMonth = today.getMonth() + 1;
-  let todayYear = today.getFullYear();
-
-  if (year < todayYear) {
-    return false;
-  } else if (year > todayYear) {
+  if (new Date() - new Date(year, month - 1, day) < 0) {
     return true;
   } else {
-    if (parseInt(month) < todayMonth) {
-      return false;
-    } else if (parseInt(month) > todayMonth) {
-      return true;
-    } else {
-      if (parseInt(day) < todayDay) {
-        return false;
-      } else if (parseInt(day) > todayDay) {
-        return true;
-      } else {
-        return false;
-      }
-    }
+    return false;
   }
 };
 
 const parseBanksRatesOneValute = (chatId, town, valute) => {
   if (!town) {
-    vk.sendMessage(chatId, "Вы не указали город!");
+    sendMessage(chatId, "Вы не указали город!");
   } else {
     let resultString = `Курс ${valute.name} ${town.name}\n\n`;
     let isEmpty = 1;
@@ -173,22 +158,15 @@ const parseBanksRatesOneValute = (chatId, town, valute) => {
       .find("tbody > tr.productBank")
       .set(["td"])
       .data((data) => {
-        resultString +=
-          "" +
-          data[0] +
-          "\n   Покупка  " +
-          data[1] +
-          "\n   Продажа " +
-          data[2] +
-          "\n\n";
+        resultString += `${data[0]} \n Покупка ${data[1]} \n Продажа ${data[2]} \n\n`;
         isEmpty = 0;
       })
       .error(logger.error)
       .done(() => {
         if (isEmpty) {
-          vk.sendMessage(chatId, `${town.name} не обменивают ${valute.name}`);
+          sendMessage(chatId, `${town.name} не обменивают ${valute.name}`);
         } else {
-          vk.sendMessage(chatId, resultString);
+          sendMessage(chatId, resultString);
         }
       });
   }
@@ -196,7 +174,7 @@ const parseBanksRatesOneValute = (chatId, town, valute) => {
 
 const parseBanksRatesAllValutes = (chatId, town) => {
   if (!town) {
-    vk.sendMessage(chatId, "Вы не указали город!");
+    sendMessage(chatId, "Вы не указали город!");
   } else {
     let resultString = `Лучшие курсы валют ${town.name}:\n\n`;
     osmosis
@@ -205,23 +183,14 @@ const parseBanksRatesAllValutes = (chatId, town) => {
       .set(["a", "span.conv-val"])
       .data((data) => {
         if (data.length > 1) {
-          resultString +=
-            "" +
-            data[0].toUpperCase() +
-            "\n " +
-            data[1] +
-            "\n   Покупка    " +
-            data[3] +
-            "\n " +
-            data[2] +
-            "\n   Продажа   " +
-            data[4] +
-            "\n\n";
+          resultString += `${data[0].toUpperCase()} \n ${data[1]} \n Покупка ${
+            data[3]
+          } \n ${data[2]} \n Продажа ${data[4]} \n\n`;
         }
       })
       .error(logger.error)
       .done(() => {
-        vk.sendMessage(chatId, resultString);
+        sendMessage(chatId, resultString);
       });
   }
 };
@@ -246,18 +215,9 @@ const CBReq = (chatId, date) => {
               logger.error(`${JSON.stringify(response)}`);
             }
             for (let i = 0; i < jsonObj.length; i++) {
-              resultString +=
-                "[" +
-                jsonObj[i].CharCode +
-                "]  " +
-                jsonObj[i].Name +
-                " x" +
-                jsonObj[i].Nominal +
-                "\n  " +
-                jsonObj[i].Value +
-                "\n\n";
+              resultString += `[${jsonObj[i].CharCode}] ${jsonObj[i].Name} x${jsonObj[i].Nominal} \n ${jsonObj[i].Value} \n\n`;
             }
-            vk.sendMessage(chatId, resultString);
+            sendMessage(chatId, resultString);
           }
         } else {
           logger.error(error);
@@ -265,7 +225,7 @@ const CBReq = (chatId, date) => {
       }
     );
   } else {
-    vk.sendMessage(chatId, "Вы указали будущую дату!");
+    sendMessage(chatId, "Вы указали будущую дату!");
   }
 };
 
@@ -320,7 +280,7 @@ vk.command(/(\d.+) (.+) в (.+)/, function (ctx) {
           }
 
           if (!valueFrom || !valueTo) {
-            vk.sendMessage(chatId, "Невалидная валюта, попробуйте снова!");
+            sendMessage(chatId, "Невалидная валюта, попробуйте снова!");
             return;
           }
 
@@ -329,7 +289,7 @@ vk.command(/(\d.+) (.+) в (.+)/, function (ctx) {
             valueTo
           ).toFixed(4);
 
-          vk.sendMessage(chatId, Result + " " + valuteTo);
+          sendMessage(chatId, `${Result} ${valuteTo}`);
         }
       } else {
         logger.error(error);
@@ -339,10 +299,10 @@ vk.command(/(\d.+) (.+) в (.+)/, function (ctx) {
 });
 
 vk.command(/курс|curs|Курс|Curs/, (ctx) => {
-  let chatId = ctx.message.user_id;
-  let text = ctx.message.body.toLowerCase();
-  let valute = parse(text, jsonValutes);
-  let town = parse(text, jsonTowns);
+  const chatId = ctx.message.user_id;
+  const text = ctx.message.body.toLowerCase();
+  const valute = parse(text, jsonValutes);
+  const town = parse(text, jsonTowns);
   logger.info(
     `id: ${chatId} send message: ${text}, parse data: ${valute.name} ${town.name}`
   );
@@ -354,9 +314,9 @@ vk.command(/курс|curs|Курс|Curs/, (ctx) => {
 });
 
 vk.command(/цб/, (ctx) => {
-  let chatId = ctx.message.user_id;
-  let text = ctx.message.body.toLowerCase();
-  let date = parseDate(text);
+  const chatId = ctx.message.user_id;
+  const text = ctx.message.body.toLowerCase();
+  const date = parseDate(text);
 
   CBReq(chatId, date);
 });
